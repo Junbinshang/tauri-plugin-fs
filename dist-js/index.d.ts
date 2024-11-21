@@ -315,11 +315,11 @@ declare class FileHandle extends Resource {
      */
     truncate(len?: number): Promise<void>;
     /**
-     * Writes `p.byteLength` bytes from `p` to the underlying data stream. It
-     * resolves to the number of bytes written from `p` (`0` <= `n` <=
-     * `p.byteLength`) or reject with the error encountered that caused the
+     * Writes `data.byteLength` bytes from `data` to the underlying data stream. It
+     * resolves to the number of bytes written from `data` (`0` <= `n` <=
+     * `data.byteLength`) or reject with the error encountered that caused the
      * write to stop early. `write()` must reject with a non-null error if
-     * would resolve to `n` < `p.byteLength`. `write()` must not modify the
+     * would resolve to `n` < `data.byteLength`. `write()` must not modify the
      * slice data, even temporarily.
      *
      * @example
@@ -703,7 +703,7 @@ interface WriteFileOptions {
  *
  * @since 2.0.0
  */
-declare function writeFile(path: string | URL, data: Uint8Array, options?: WriteFileOptions): Promise<void>;
+declare function writeFile(path: string | URL, data: Uint8Array | ReadableStream<Uint8Array>, options?: WriteFileOptions): Promise<void>;
 /**
   * Writes UTF-8 string `data` to the given `path`, by default creating a new file if needed, else overwriting.
     @example

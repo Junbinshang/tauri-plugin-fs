@@ -108,6 +108,7 @@ function fromBytes(buffer) {
     const size = bytes.byteLength;
     let x = 0;
     for (let i = 0; i < size; i++) {
+        // eslint-disable-next-line security/detect-object-injection
         const byte = bytes[i];
         x *= 0x100;
         x += byte;
@@ -259,11 +260,11 @@ class FileHandle extends Resource {
         });
     }
     /**
-     * Writes `p.byteLength` bytes from `p` to the underlying data stream. It
-     * resolves to the number of bytes written from `p` (`0` <= `n` <=
-     * `p.byteLength`) or reject with the error encountered that caused the
+     * Writes `data.byteLength` bytes from `data` to the underlying data stream. It
+     * resolves to the number of bytes written from `data` (`0` <= `n` <=
+     * `data.byteLength`) or reject with the error encountered that caused the
      * write to stop early. `write()` must reject with a non-null error if
-     * would resolve to `n` < `p.byteLength`. `write()` must not modify the
+     * would resolve to `n` < `data.byteLength`. `write()` must not modify the
      * slice data, even temporarily.
      *
      * @example
@@ -625,12 +626,21 @@ async function writeFile(path, data, options) {
     if (path instanceof URL && path.protocol !== 'file:') {
         throw new TypeError('Must be a file URL.');
     }
-    await invoke('plugin:fs|write_file', data, {
-        headers: {
-            path: encodeURIComponent(path instanceof URL ? path.toString() : path),
-            options: JSON.stringify(options)
+    if (data instanceof ReadableStream) {
+        const file = await open(path, options);
+        for await (const chunk of data) {
+            await file.write(chunk);
         }
-    });
+        await file.close();
+    }
+    else {
+        await invoke('plugin:fs|write_file', data, {
+            headers: {
+                path: encodeURIComponent(path instanceof URL ? path.toString() : path),
+                options: JSON.stringify(options)
+            }
+        });
+    }
 }
 /**
   * Writes UTF-8 string `data` to the given `path`, by default creating a new file if needed, else overwriting.
