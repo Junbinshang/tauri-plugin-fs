@@ -1322,6 +1322,31 @@ async function watchImmediate(
   }
 }
 
+/**
+ * Get the size of a file or directory. For files, the `stat` functions can be used as well.
+ *
+ * If `path` is a directory, this function will recursively iterate over every file and every directory inside of `path` and therefore will be very time consuming if used on larger directories.
+ *
+ * @example
+ * ```typescript
+ * import { size, BaseDirectory } from '@tauri-apps/plugin-fs';
+ * // Get the size of the `$APPDATA/tauri` directory.
+ * const dirSize = await size('tauri', { baseDir: BaseDirectory.AppData });
+ * console.log(dirSize); // 1024
+ * ```
+ *
+ * @since 2.1.0
+ */
+async function size(path: string | URL): Promise<number> {
+  if (path instanceof URL && path.protocol !== 'file:') {
+    throw new TypeError('Must be a file URL.')
+  }
+
+  return await invoke('plugin:fs|size', {
+    path: path instanceof URL ? path.toString() : path
+  })
+}
+
 export type {
   CreateOptions,
   OpenOptions,
@@ -1369,5 +1394,6 @@ export {
   writeTextFile,
   exists,
   watch,
-  watchImmediate
+  watchImmediate,
+  size
 }
