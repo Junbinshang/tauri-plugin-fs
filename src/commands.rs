@@ -449,7 +449,7 @@ pub struct RemoveOptions {
 }
 
 #[tauri::command]
-pub fn remove<R: Runtime>(
+pub async fn remove<R: Runtime>(
     webview: Webview<R>,
     global_scope: GlobalScope<Entry>,
     command_scope: CommandScope<Entry>,
